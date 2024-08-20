@@ -131,7 +131,7 @@ void Ekf::controlMagFusion(const imuSample &imu_sample)
 						     && mag_sample.mag.isAllFinite();
 
 		const bool starting_conditions_passing = continuing_conditions_passing
-				&& checkMagField(mag_sample.mag)
+				&& checkMagField(mag_sample.mag - _state.mag_B)
 				&& (_mag_counter > 3) // wait until we have more than a few samples through the filter
 				&& (_control_status.flags.yaw_align == _control_status_prev.flags.yaw_align) // no yaw alignment change this frame
 				&& (_state_reset_status.reset_count.quat ==
