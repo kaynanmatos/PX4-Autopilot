@@ -165,6 +165,55 @@ bool Ekf::setAltOrigin(const float altitude, const float epv)
 	return true;
 }
 
+bool Ekf::setEkfGlobalOriginFromCurrentPos(const double latitude, const double longitude, const float altitude,
+		const float eph, const float epv)
+{
+	if (!setLatLonOriginFromCurrentPos(latitude, longitude, eph)) {
+		return false;
+	}
+
+	// altitude is optional
+	setAltOriginFromCurrentPos(altitude, epv);
+
+	return true;
+}
+
+bool Ekf::setLatLonOriginFromCurrentPos(const double latitude, const double longitude, const float eph)
+{
+	// Enabling this would trigger the change indicator
+	// if (!checkLatLonValidity(latitude, longitude, eph)) {
+	// 	return false;
+	// }
+
+	_pos_ref.initReference(latitude, longitude, _time_delayed_us);
+
+	// if we are already doing aiding, correct for the change in position since the EKF started navigating
+	if (isHorizontalAidingActive()) {
+		double est_lat;
+		double est_lon;
+		_pos_ref.reproject(-_state.pos(0), -_state.pos(1), est_lat, est_lon);
+		_pos_ref.initReference(est_lat, est_lon, _time_delayed_us);
+	}
+
+	_NED_origin_initialised = true;
+
+	_gpos_origin_eph = eph;
+
+	return true;
+}
+
+bool Ekf::setAltOriginFromCurrentPos(const float altitude, const float epv)
+{
+	if (!checkAltitudeValidity(altitude, epv)) {
+		return false;
+	}
+
+	_gps_alt_ref = altitude + _state.pos(2);
+	_gpos_origin_epv = epv;
+
+	return true;
+}
+
 void Ekf::updateWmm(const double lat, const double lon)
 {
 #if defined(CONFIG_EKF2_MAGNETOMETER)
