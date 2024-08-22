@@ -180,10 +180,9 @@ bool Ekf::setEkfGlobalOriginFromCurrentPos(const double latitude, const double l
 
 bool Ekf::setLatLonOriginFromCurrentPos(const double latitude, const double longitude, const float eph)
 {
-	// Enabling this would trigger the change indicator
-	// if (!checkLatLonValidity(latitude, longitude, eph)) {
-	// 	return false;
-	// }
+	if (!checkLatLonValidity(latitude, longitude, eph)) {
+		return false;
+	}
 
 	_pos_ref.initReference(latitude, longitude, _time_delayed_us);
 
