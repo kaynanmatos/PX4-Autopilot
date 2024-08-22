@@ -703,6 +703,18 @@ Commander::Commander() :
 	_param_mav_type = param_find("MAV_TYPE");
 	_param_rc_map_fltmode = param_find("RC_MAP_FLTMODE");
 
+	int32_t value_int32 = 0;
+
+	// MAV_SYS_ID => vehicle_status.system_id
+	if ((_param_mav_sys_id != PARAM_INVALID) && (param_get(_param_mav_sys_id, &value_int32) == PX4_OK)) {
+		_vehicle_status.system_id = value_int32;
+	}
+
+	// MAV_COMP_ID => vehicle_status.component_id
+	if ((_param_mav_comp_id != PARAM_INVALID) && (param_get(_param_mav_comp_id, &value_int32) == PX4_OK)) {
+		_vehicle_status.component_id = value_int32;
+	}
+
 	updateParameters();
 }
 
@@ -1682,15 +1694,8 @@ void Commander::updateParameters()
 
 	int32_t value_int32 = 0;
 
-	// MAV_SYS_ID => vehicle_status.system_id
-	if ((_param_mav_sys_id != PARAM_INVALID) && (param_get(_param_mav_sys_id, &value_int32) == PX4_OK)) {
-		_vehicle_status.system_id = value_int32;
-	}
-
-	// MAV_COMP_ID => vehicle_status.component_id
-	if ((_param_mav_comp_id != PARAM_INVALID) && (param_get(_param_mav_comp_id, &value_int32) == PX4_OK)) {
-		_vehicle_status.component_id = value_int32;
-	}
+	// NOTE: The system can't handle changing the system_id, and component_id in the same session
+	// you need to reboot the vehicle for settings to change
 
 	// MAV_TYPE -> vehicle_status.system_type
 	if ((_param_mav_type != PARAM_INVALID) && (param_get(_param_mav_type, &value_int32) == PX4_OK)) {
